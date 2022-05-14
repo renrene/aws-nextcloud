@@ -4,6 +4,7 @@ locals {
 
 resource "aws_cloudwatch_log_group" "ecs-nginx" {
     name = "log-group-${local.service_name}"
+    retention_in_days = 7
 }
 
 resource "aws_ecs_cluster" "main" {
