@@ -1,7 +1,3 @@
-locals {
-    region = data.aws_region.current.id
-}
-
 module "vpc" {
     source = "terraform-aws-modules/vpc/aws"
     version = "3.14.0"
@@ -25,9 +21,13 @@ module "vpc" {
         "type" = "private"
     }
 
+    public_subnet_tags = {
+        "type" = "public"
+    }
     manage_default_security_group = false
+}
 
-    
-    
-    
+
+locals {
+    region = data.aws_region.current.id
 }
