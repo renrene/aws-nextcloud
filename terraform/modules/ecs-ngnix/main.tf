@@ -75,4 +75,8 @@ resource "aws_ecs_service" "ngnix" {
         subnets = data.aws_subnets.public_subnets.ids
         assign_public_ip = true
     }
+
+    service_registries {
+        registry_arn = aws_service_discovery_service.main.arn
+    }
 }

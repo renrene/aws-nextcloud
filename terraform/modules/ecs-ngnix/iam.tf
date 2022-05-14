@@ -19,7 +19,7 @@ data "aws_iam_policy_document" "ecs_logs_policy" {
             "logs:PutLogEvents"
         ]
         effect = "Allow"
-        resources = [ aws_cloudwatch_log_group.ecs-nginx.arn ]
+        resources = [ "${aws_cloudwatch_log_group.ecs-nginx.arn}:*" ]
     }
 }
 
