@@ -13,21 +13,13 @@ data "aws_iam_policy_document" "assume_role_policy" {
 
 data "aws_iam_policy_document" "ecs_logs_policy" {
     statement {
-        sid = "CreateCloudWatchLogGroups"
-        actions = [ 
-            "logs:CreateLogGroup" 
-        ]
-        effect = "Allow"
-        resources = ["*"]
-    }
-    statement {
         sid = "CreateCloudWatchLogStreamsAndPutLogEvents"
         actions = [ 
             "logs:CreateLogStream",
             "logs:PutLogEvents"
         ]
         effect = "Allow"
-        resources = ["*"]
+        resources = [ aws_cloudwatch_log_group.ecs-nginx.arn ]
     }
 }
 
