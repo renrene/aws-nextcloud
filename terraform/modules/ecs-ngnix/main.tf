@@ -8,6 +8,7 @@ resource "aws_ecs_task_definition" "ngnix" {
     cpu = 512
     memory = 1024
     requires_compatibilities = [ "FARGATE" ]
+    task_role_arn = aws_iam_role.ecs_task_execution_role.arn
     container_definitions = jsonencode([
         {
             name = "ngnix-dummy"
@@ -49,10 +50,11 @@ resource "aws_ecs_service" "ngnix" {
     cluster = aws_ecs_cluster.main.id
     task_definition = aws_ecs_task_definition.ngnix.arn
     launch_type = "FARGATE"
+    desired_count = 1
+
     network_configuration {
         security_groups = [ aws_security_group.ecs.id ]
         subnets = data.aws_subnets.private_subnets.ids
         assign_public_ip = false
     }
 }
-
