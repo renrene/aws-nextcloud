@@ -1,0 +1,2 @@
+# aws-nextcloud
+Serverless Nextcloud
