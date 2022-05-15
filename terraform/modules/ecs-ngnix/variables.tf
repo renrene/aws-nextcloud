@@ -12,5 +12,4 @@ variable "service_registry_arn" {
 variable "service_registry_id" {
     type = string
     description = "ID of the CloudMap private registry"
-  
 }
