@@ -13,7 +13,7 @@ variable "public_hosted_zone" {
     description = "Route53 public hosted zone for the api dns record and ssl cert."
 }
 
-variable "service_name" {
+variable "service_arn" {
     type = string
-    description = "fqdn and discoverable service name"
+    description = "discoverable service arn"
 }
