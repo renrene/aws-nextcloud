@@ -16,11 +16,17 @@ module "cloud-map" {
   vpc_id = module.vpc.vpc_id
 }
 
+module "app-mesh" {
+    source = "./modules/app-mesh"
+}
+
 module "ecs-ngnix" {
     source = "./modules/ecs-ngnix"
     vpc_id = module.vpc.vpc_id
     service_registry_arn = module.cloud-map.namespace_arn
     service_registry_id = module.cloud-map.namespace_id
+    app_mesh_name = module.app-mesh.mesh_name
+    namespace_name = module.cloud-map.namespace_name
 }
 
 module "apigw" {

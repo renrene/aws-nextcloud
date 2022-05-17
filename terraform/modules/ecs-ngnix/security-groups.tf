@@ -7,7 +7,9 @@ resource "aws_security_group" "ecs" {
       from_port = 80
       to_port = 80
       protocol = "tcp"
+      self = true
     } 
+
     egress {
       cidr_blocks = [ "0.0.0.0/0" ]
       description = "world access"
