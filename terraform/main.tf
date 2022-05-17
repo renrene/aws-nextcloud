@@ -1,3 +1,7 @@
+locals {
+  region = data.aws_region.current.id
+}
+
 terraform {
     required_providers {
         aws = {
@@ -7,10 +11,22 @@ terraform {
     }
 }
 
+module "cloud-map" {
+  source = "./modules/cloud-map"
+  vpc_id = module.vpc.vpc_id
+}
+
+module "ecs-ngnix" {
+    source = "./modules/ecs-ngnix"
+    vpc_id = module.vpc.vpc_id
+    service_registry_arn = module.cloud-map.namespace_arn
+    service_registry_id = module.cloud-map.namespace_id
+}
+
 module "apigw" {
     source = "./modules/apigw"
     vpc_link_security_groups = [ module.ecs-ngnix.ecs_security_group_id ]
-    vpc_link_subnets = module.vpc.attributes.public_subnets
+    vpc_link_subnets = module.vpc.public_subnets
     public_hosted_zone = "net.rhizomatic.biz"
     service_arn = module.ecs-ngnix.discovery_service_arn
 }
