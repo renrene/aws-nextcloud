@@ -50,3 +50,25 @@ resource "aws_appmesh_virtual_service" "main" {
     }
   }
 }
+
+resource "aws_appmesh_gateway_route" "gw_routes" {
+  for_each = var.gw_routes
+  virtual_gateway_name = each.value.virtual_gateway_name
+  mesh_name = var.app_mesh_name
+  name = "gw-route-${each.key}"
+  spec {
+    http_route {
+      match {
+        prefix = each.value.match_prefix
+      }
+      action {
+        target {
+          virtual_service {
+            virtual_service_name = aws_appmesh_virtual_service.main.name
+          }
+        }
+      }
+    }
+
+  }
+}

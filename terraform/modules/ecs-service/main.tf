@@ -5,6 +5,7 @@ locals {
             cpu = 128
             memory = 128
             essential = true
+            environment = var.environment_variables
             portMappings =  [
                 {
                     containerPort: 80

@@ -47,3 +47,23 @@ variable "task_image_url" {
   
 
 }
+
+variable "environment_variables" {
+    type = list(object(
+        {
+            name = string
+            value = string
+        }
+    ))
+    default = []
+}
+
+variable "gw_routes" {
+    type = map(object(
+        {
+            virtual_gateway_name = string
+            match_prefix = string
+        }
+    ))
+    default = {}
+}

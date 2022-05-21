@@ -3,7 +3,7 @@ output "ecs_security_group_id" {
 }
 
 output "service_name" {
-    value = aws_ecs_service.main.name
+    value = aws_appmesh_virtual_gateway.main.name
 }
 
 output "discovery_service_arn" {

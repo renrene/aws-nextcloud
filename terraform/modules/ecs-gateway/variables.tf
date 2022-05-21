@@ -45,13 +45,3 @@ variable "task_image_url" {
     description = "url of the image to pull"
     default = null
 }
-
-variable "gw_routes" {
-    type = map(object(
-        {
-            target_service = string
-            match_prefix = string
-        }
-    ))
-    default = {}
-}
