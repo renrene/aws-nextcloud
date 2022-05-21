@@ -1,5 +1,5 @@
 resource "aws_service_discovery_service" "main" {
-  name = local.service_name
+  name = var.ecs_service_name
 
   dns_config {
     namespace_id = var.service_registry_id
@@ -18,7 +18,7 @@ resource "aws_service_discovery_service" "main" {
 }
 
 resource "aws_appmesh_virtual_node" "main" {
-  name = "vs-${local.service_name}"
+  name = "vn-${var.ecs_service_name}"
   mesh_name = var.app_mesh_name
 
   spec {
@@ -31,7 +31,7 @@ resource "aws_appmesh_virtual_node" "main" {
 
     service_discovery {
       aws_cloud_map {
-        service_name = local.service_name
+        service_name = aws_service_discovery_service.main.name
         namespace_name = var.namespace_name
       }
     }
@@ -39,7 +39,7 @@ resource "aws_appmesh_virtual_node" "main" {
 }
 
 resource "aws_appmesh_virtual_service" "main" {
-  name = "${local.service_name}.${var.namespace_name}"
+  name = "${var.ecs_service_name}.${var.namespace_name}"
   mesh_name = var.app_mesh_name
 
   spec {
@@ -49,5 +49,4 @@ resource "aws_appmesh_virtual_service" "main" {
       }
     }
   }
-  
 }

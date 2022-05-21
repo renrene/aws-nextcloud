@@ -3,7 +3,7 @@ output "ecs_security_group_id" {
 }
 
 output "service_name" {
-    value = aws_ecs_service.ngnix.name
+    value = aws_ecs_service.main.name
 }
 
 output "discovery_service_arn" {

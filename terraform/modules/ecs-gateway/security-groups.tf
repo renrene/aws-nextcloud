@@ -1,5 +1,5 @@
 resource "aws_security_group" "ecs" {
-    name = "main-ngnix"
+    name = "sgr-${var.ecs_service_name}"
     vpc_id = var.vpc_id
     ingress  {
       cidr_blocks = [ "10.10.0.0/16" ]
