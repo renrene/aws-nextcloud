@@ -1,15 +1,19 @@
 locals {
     main_task = {
             name = var.ecs_service_name
-            image = var.task_image_url
-            cpu = 128
-            memory = 128
+            image = var.task_specs.image
+            cpu = var.task_specs.cpu
+            memory = var.task_specs.memory
             essential = true
             environment = var.environment_variables
             portMappings =  [
                 {
-                    containerPort: 80
-                    hostPort:80
+                    protocol = "tcp"
+                    containerPort = 80
+                },
+                {
+                    protocol = "tcp"
+                    containerPort = 22
                 }
             ]
             logConfiguration = {
@@ -67,8 +71,8 @@ resource "aws_cloudwatch_log_group" "ecs-service" {
 resource "aws_ecs_task_definition" "main" {
     family = var.ecs_service_name
     network_mode = "awsvpc"
-    cpu = 512
-    memory = 1024
+    cpu = var.service_specs.cpu
+    memory = var.service_specs.memory
     requires_compatibilities = [ "FARGATE" ]
     execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
     task_role_arn = aws_iam_role.ecs_task_role.arn
@@ -80,7 +84,7 @@ resource "aws_ecs_task_definition" "main" {
         type = "APPMESH"
         container_name = "envoy"
         properties = {
-            AppPorts = 80
+            AppPorts = "80,443"
             EgressIgnoredIPs = "169.254.170.2,169.254.169.254"
             IgnoredUID       = 1337
             ProxyEgressPort  = 15001

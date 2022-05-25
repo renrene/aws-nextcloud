@@ -1,4 +1,5 @@
 locals {
+    service_name = "vg-main"
     envoy_task = {        
             name = "envoy"
             image = "840364872350.dkr.ecr.eu-west-1.amazonaws.com/aws-appmesh-envoy:v1.22.0.0-prod"
@@ -30,15 +31,19 @@ locals {
 }
 
 resource "aws_cloudwatch_log_group" "ecs-service" {
-    name = "log-group-${var.ecs_service_name}"
+    name = "log-group-${local.service_name}"
     retention_in_days = 7
 }
 
+resource "aws_ecs_cluster" "main" {
+    name = local.service_name
+}
+
 resource "aws_ecs_task_definition" "main" {
-    family = var.ecs_service_name
+    family = local.service_name
     network_mode = "awsvpc"
-    cpu = 512
-    memory = 1024
+    cpu = 256
+    memory = 512
     requires_compatibilities = [ "FARGATE" ]
     execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
     task_role_arn = aws_iam_role.ecs_task_role.arn
@@ -48,8 +53,8 @@ resource "aws_ecs_task_definition" "main" {
 }
 
 resource "aws_ecs_service" "main" {
-    name = var.ecs_service_name
-    cluster = var.ecs_cluster_id
+    name = local.service_name
+    cluster = aws_ecs_cluster.main.id
     task_definition = aws_ecs_task_definition.main.arn
     launch_type = "FARGATE"
     desired_count = 1

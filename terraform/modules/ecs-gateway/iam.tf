@@ -41,18 +41,18 @@ data "aws_iam_policy_document" "ecs_pull_from_ecr_policy" {
 }
 
 resource "aws_iam_role" "ecs_task_execution_role" {
-    name = "role-ecs-task-exec-${var.ecs_service_name}"
+    name = "role-ecs-task-exec-${local.service_name}"
     assume_role_policy = data.aws_iam_policy_document.assume_role_policy.json
 }
 
 resource "aws_iam_policy" "ecs_task_execution_logs" {
-    name = "policy-ecs-allow-logs-${var.ecs_service_name}"
+    name = "policy-ecs-allow-logs-${local.service_name}"
     description = "Allow ECS tasks to create log groups in CloudWatch and write to them"
     policy = data.aws_iam_policy_document.ecs_logs_policy.json
 }
 
 resource "aws_iam_policy" "ecs_task_execution_ecr" {
-    name = "policy-ecs-allow-ecr-${var.ecs_service_name}"
+    name = "policy-ecs-allow-ecr-${local.service_name}"
     description = "Allow ECS tasks to pull images from ECR"
     policy = data.aws_iam_policy_document.ecs_pull_from_ecr_policy.json
 }
@@ -86,7 +86,7 @@ data "aws_iam_policy_document" "ecs_task_app_mesh" {
 }
 
 resource "aws_iam_policy" "ecs_task_app_mesh" {
-    name = "policy-ecs-task-app-mesh-${var.ecs_service_name}"
+    name = "policy-ecs-task-app-mesh-${local.service_name}"
     description = "Allow ECS tasks to access the shared app-mesh"
     policy = data.aws_iam_policy_document.ecs_task_app_mesh.json
     
@@ -94,7 +94,7 @@ resource "aws_iam_policy" "ecs_task_app_mesh" {
 
 resource "aws_iam_role" "ecs_task_role" {
     assume_role_policy = data.aws_iam_policy_document.assume_role_policy.json
-    name = "role-ecs-task-${var.ecs_service_name}"
+    name = "role-ecs-task-${local.service_name}"
     description = "IAM Role for the ECS task"  
 }
 

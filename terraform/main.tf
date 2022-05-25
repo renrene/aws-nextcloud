@@ -19,6 +19,11 @@ resource "aws_service_discovery_private_dns_namespace" "main" {
 
 resource "aws_appmesh_mesh" "main" {
     name = "privatier-local"
+    spec {
+      egress_filter {
+        type = "ALLOW_ALL"
+      }
+    }
 }
 
 resource "aws_ecs_cluster" "main" {
@@ -27,10 +32,7 @@ resource "aws_ecs_cluster" "main" {
 
 module "ecs-gateway" {
     source = "./modules/ecs-gateway"
-    ## service details
-    ecs_service_name = "vg-main"
-    ## cluster and vpc
-    ecs_cluster_id = aws_ecs_cluster.main.id
+    ## vpc
     vpc_id = module.vpc.vpc_id
     ## service descovery
     service_registry_arn = aws_service_discovery_private_dns_namespace.main.arn
@@ -45,7 +47,17 @@ module "ecs-nginx" {
     source = "./modules/ecs-service"
     ## service details
     ecs_service_name = "nginx-dummy"
-    task_image_url = "662716712905.dkr.ecr.eu-west-1.amazonaws.com/nginx:latest"
+    # Global Task-Definition specs
+    service_specs = {
+      cpu = 256
+      memory = 512
+    }
+    # Container Specs
+    task_specs = {
+      cpu = 128
+      image = "662716712905.dkr.ecr.eu-west-1.amazonaws.com/nginx:latest"
+      memory = 128
+    }
     ## cluster and vpc
     ecs_cluster_id = aws_ecs_cluster.main.id
     vpc_id = module.vpc.vpc_id
@@ -69,7 +81,15 @@ module "ecs-nextcloud" {
     source = "./modules/ecs-service"
     ## service details
     ecs_service_name = "nextcloud"
-    task_image_url = "662716712905.dkr.ecr.eu-west-1.amazonaws.com/nextcloud:latest"
+    service_specs = {
+      cpu = 1024
+      memory = 2048
+    }
+    task_specs = {
+      cpu = 512
+      image = "662716712905.dkr.ecr.eu-west-1.amazonaws.com/nextcloud:latest"
+      memory = 512
+    }
     ## cluster and vpc
     ecs_cluster_id = aws_ecs_cluster.main.id
     vpc_id = module.vpc.vpc_id
@@ -83,14 +103,26 @@ module "ecs-nextcloud" {
     ## task envs
     environment_variables = [ {
       name = "NEXTCLOUD_TRUSTED_DOMAINS"
-      value = "api.net.rhizomatic.biz"
+      value = module.apigw.apigw_domain
+    },
+    # {
+    #     name = "APACHE_DISABLE_REWRITE_IP"
+    #     value = 1
+    # },{
+    #     name = "TRUSTED_PROXIES"
+    #     value = "10.10.0.0/16"
+    # },
+    {
+        name = "OVERWRITEHOST"
+        value = module.apigw.apigw_domain
+    },
+    {
+        name = "OVERWRITEPROTOCOL"
+        value = "https"
     },{
-        name = "APACHE_DISABLE_REWRITE_IP"
-        value = 1
-    },{
-        name = "TRUSTED_PROXIES"
-        value = "10.10.0.0/16"
-    } 
+        name = "OVERWRITECLIURL"
+        value = "https://${module.apigw.apigw_domain}"
+    }
     ]
     gw_routes = {
       "nextcloud" = {

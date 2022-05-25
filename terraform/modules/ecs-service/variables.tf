@@ -8,6 +8,16 @@ variable "ecs_service_name" {
     description = "Name of the ecs service"
 }
 
+variable "service_specs" {
+    type = object(
+        {
+            cpu = number
+            memory = number
+        }
+    )
+    description = "cpu, memory"
+}
+
 variable "vpc_id" {
     type = string
     description = "VPC Id of the ECS Cluster"
@@ -40,12 +50,15 @@ variable "app_mesh_arn" {
   
 }
 
-variable "task_image_url" {
-    type = string
-    description = "url of the image to pull"
-    default = null
-  
-
+variable "task_specs" {
+    type = object(
+        {
+            cpu = number
+            memory = number
+            image = string
+        }
+    )
+    description = "cpu, memory, image"
 }
 
 variable "environment_variables" {

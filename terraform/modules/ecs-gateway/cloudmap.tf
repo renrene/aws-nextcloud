@@ -1,5 +1,5 @@
 resource "aws_service_discovery_service" "main" {
-  name = var.ecs_service_name
+  name = local.service_name
 
   dns_config {
     namespace_id = var.service_registry_id
@@ -18,7 +18,7 @@ resource "aws_service_discovery_service" "main" {
 }
 
 resource "aws_appmesh_virtual_gateway" "main" {
-    name = var.ecs_service_name
+    name = local.service_name
     mesh_name = var.app_mesh_name
 
     spec {
