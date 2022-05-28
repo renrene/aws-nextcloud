@@ -8,6 +8,7 @@ module "vpc" {
     azs = ["${local.region}a", "${local.region}b"]
     private_subnets = ["10.10.1.0/24","10.10.2.0/24"]
     public_subnets = ["10.10.101.0/24","10.10.102.0/24"]
+    database_subnets = ["10.10.201.0/24","10.10.202.0/24"]
 
     enable_ipv6 = false
     enable_nat_gateway = false
@@ -23,6 +24,10 @@ module "vpc" {
 
     public_subnet_tags = {
         "type" = "public"
+    }
+
+    database_subnet_tags = {
+      "type" = "database"
     }
     manage_default_security_group = false
 }
