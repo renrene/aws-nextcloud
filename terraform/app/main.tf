@@ -9,6 +9,12 @@ terraform {
             version = "~> 4.14"
         }
     }
+    backend "s3" {
+        bucket = "privatier-tf-state-backend"
+        key = "app"
+        profile = "privatier"
+        region = "eu-west-1"
+    }
 }
 
 resource "aws_service_discovery_private_dns_namespace" "main" {
@@ -145,9 +151,9 @@ module "ecs-nextcloud" {
     }
 }
 
-module "db-nextcloud" {
-    source = "./modules/mysql"
-    vpc_id = module.vpc.vpc_id
-    db_subnet_group_name = module.vpc.database_subnet_group_name
-}
+# module "db-nextcloud" {
+#     source = "./modules/mysql"
+#     vpc_id = module.vpc.vpc_id
+#     db_subnet_group_name = module.vpc.database_subnet_group_name
+# }
 
