@@ -32,20 +32,21 @@ module "vpc" {
     manage_default_security_group = false
 }
 
+## Shared vpc peering, routing and security groups
 resource "aws_vpc_peering_connection" "shared" {
   vpc_id = module.vpc.vpc_id
   peer_vpc_id = data.terraform_remote_state.shared.outputs.vpc.vpc_id
   auto_accept = true
 }
 
-resource "aws_route" "main" {
+resource "aws_route" "main-shared" {
     count = length(module.vpc.public_route_table_ids)
     route_table_id = module.vpc.public_route_table_ids[count.index]
     destination_cidr_block = data.terraform_remote_state.shared.outputs.vpc.vpc_cidr_block
     vpc_peering_connection_id = aws_vpc_peering_connection.shared.id
 }
 
-resource "aws_route" "shared" {
+resource "aws_route" "shared-main" {
     count = length(data.terraform_remote_state.shared.outputs.vpc.public_route_table_ids)
     route_table_id = data.terraform_remote_state.shared.outputs.vpc.public_route_table_ids[count.index]
     destination_cidr_block = module.vpc.vpc_cidr_block
@@ -62,4 +63,37 @@ resource "aws_security_group" "access_from_share" {
       protocol = "-1"
       self = false
     }
+}
+
+
+## Data vpc peering, routing and security groups
+resource "aws_vpc_peering_connection" "data" {
+  vpc_id = module.vpc.vpc_id
+  peer_vpc_id = data.terraform_remote_state.data.outputs.vpc.vpc_id
+  auto_accept = true  
+}
+
+resource "aws_route" "main-data" {
+    count = length(module.vpc.public_route_table_ids)
+    route_table_id = module.vpc.public_route_table_ids[count.index]
+    destination_cidr_block = data.terraform_remote_state.data.outputs.vpc.vpc_cidr_block
+    vpc_peering_connection_id = aws_vpc_peering_connection.data.id
+}
+
+resource "aws_route" "data-main" {
+    count = length(data.terraform_remote_state.data.outputs.vpc.database_route_table_ids)
+    route_table_id = data.terraform_remote_state.data.outputs.vpc.database_route_table_ids[count.index]
+    destination_cidr_block = module.vpc.vpc_cidr_block
+    vpc_peering_connection_id = aws_vpc_peering_connection.data.id
+}
+
+
+resource "aws_security_group_rule" "access_to_data" {
+  type = "ingress"
+  security_group_id = data.terraform_remote_state.data.outputs.nextcloud_db_security_group
+  cidr_blocks = [ module.vpc.vpc_cidr_block ]
+  description = "Access from apps VPC"
+  from_port = 0
+  to_port = 0
+  protocol = "-1"
 }

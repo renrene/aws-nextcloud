@@ -1,14 +1,13 @@
 locals {
-  ingress_cidrs = [ for s in data.aws_subnet.allow : s.cidr_block ]
-  db_sbunets_ids = [ for s in data.aws_subnet.database : s.id ]
+  
 }
 
 
 resource "aws_security_group" "main" {
-    name = "sgr-aurora-nextcloud"
+    name = "sgr-rds-${var.db_name}"
     vpc_id = var.vpc_id
     ingress {
-      cidr_blocks = local.ingress_cidrs
+      cidr_blocks = [ data.aws_vpc.data.cidr_block ]
       description = "Access from VPC"
       from_port = 5432
       to_port = 5432
@@ -16,7 +15,7 @@ resource "aws_security_group" "main" {
       self = false
     } 
     egress {
-      cidr_blocks = ["10.10.0.0/16"]
+      cidr_blocks = [ data.aws_vpc.data.cidr_block ]
       description = "Access to VPC"
       from_port = 0
       protocol = "-1"
@@ -26,15 +25,34 @@ resource "aws_security_group" "main" {
   
 }
 
+resource "random_password" "admin_password" {
+    length = 16
+    special = true
+}
+
+resource "aws_ssm_parameter" "admin_password" {
+    name = "/infra/rds-${var.db_name}/admin-password"
+    type = "SecureString"
+    value = random_password.admin_password.result
+}
+
+resource "aws_ssm_parameter" "admin_username" {
+    name = "/infra/rds-${var.db_name}/admin-username"
+    type = "String"
+    value = "dbadmin"
+}
+
 resource "aws_db_instance" "main" {
     identifier = "rds-postgres-${var.db_name}" 
-    engine = "PostgreSQL"
+    engine = "postgres"
     engine_version = "13.6"   
-    allocated_storage = 20
-    max_allocated_storage = 40
+    allocated_storage = 5
+    max_allocated_storage = 10
     copy_tags_to_snapshot = true
     db_subnet_group_name = var.db_subnet_group_name
     db_name = var.db_name
+    username = aws_ssm_parameter.admin_username.value
+    password = aws_ssm_parameter.admin_password.value
     skip_final_snapshot = true
     # final_snapshot_identifier = "final-snap-${var.db_name}"
     instance_class = var.instance_class
