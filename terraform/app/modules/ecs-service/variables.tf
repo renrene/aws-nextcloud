@@ -23,6 +23,11 @@ variable "vpc_id" {
     description = "VPC Id of the ECS Cluster"
 }
 
+variable "shared_security_id" {
+    type = string
+    description = "Access from shared vpc"
+}
+
 variable "service_registry_arn" {
     type = string
     description = "ARN of the CloudMap private registry"

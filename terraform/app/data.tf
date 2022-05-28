@@ -1,3 +1,11 @@
-data "aws_caller_identity" "current" {}
-
 data "aws_region" "current" {}
+
+data "terraform_remote_state" "shared" {
+    backend = "s3"
+    config = {
+        bucket = "privatier-tf-state-backend"
+        key = "shared"
+        profile = "privatier"
+        region = "eu-west-1"
+     }
+}

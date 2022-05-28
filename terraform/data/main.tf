@@ -13,9 +13,12 @@ terraform {
     }
 }
 
+
+
 module "db-nextcloud" {
     source = "./modules/rds"
     db_name = "nextcloud"
-    
+    vpc_id = module.vpc.vpc_id
+    db_subnet_group_name = module.vpc.database_subnet_group_name
   
 }

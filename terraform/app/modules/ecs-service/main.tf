@@ -102,7 +102,7 @@ resource "aws_ecs_service" "main" {
     desired_count = 1
 
     network_configuration {
-        security_groups = [ aws_security_group.ecs.id ]
+        security_groups = [ aws_security_group.ecs.id, var.shared_security_id ]
         subnets = data.aws_subnets.public_subnets.ids
         assign_public_ip = true
     }
