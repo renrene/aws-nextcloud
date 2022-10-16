@@ -26,7 +26,10 @@ locals {
                     awslogs-stream-prefix = "envoy-logs"
                 }
             }
-        }
+            portMappings = [{
+                containerPort = 80
+            }]
+    }
     
 }
 
@@ -35,16 +38,13 @@ resource "aws_cloudwatch_log_group" "ecs-service" {
     retention_in_days = 7
 }
 
-resource "aws_ecs_cluster" "main" {
-    name = local.service_name
-}
 
 resource "aws_ecs_task_definition" "main" {
     family = local.service_name
     network_mode = "awsvpc"
-    cpu = 256
-    memory = 512
-    requires_compatibilities = [ "FARGATE" ]
+    cpu = 128
+    memory = 128
+    requires_compatibilities = [ var.cluster_type ]
     execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
     task_role_arn = aws_iam_role.ecs_task_role.arn
     container_definitions = jsonencode([
@@ -54,15 +54,14 @@ resource "aws_ecs_task_definition" "main" {
 
 resource "aws_ecs_service" "main" {
     name = local.service_name
-    cluster = aws_ecs_cluster.main.id
+    cluster = var.cluster_id
     task_definition = aws_ecs_task_definition.main.arn
-    launch_type = "FARGATE"
+    launch_type = var.cluster_type
     desired_count = 1
 
     network_configuration {
         security_groups = [ aws_security_group.ecs.id ]
         subnets = data.aws_subnets.public_subnets.ids
-        assign_public_ip = true
     }
 
     service_registries {

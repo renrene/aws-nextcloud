@@ -17,13 +17,14 @@ terraform {
     }
 }
 
-
+## Global CloudMap namespace
 resource "aws_service_discovery_private_dns_namespace" "main" {
     name = "privatier.local"
     description = "service discovery for Privatier"
     vpc = module.vpc.vpc_id
 }
 
+## Global AppMesh
 resource "aws_appmesh_mesh" "main" {
     name = "privatier-local"
     spec {
@@ -33,10 +34,24 @@ resource "aws_appmesh_mesh" "main" {
     }
 }
 
+## Global ECS Cluster
+module "ecs-cluster" {
+    source = "./modules/ecs-instance-cluster"
+    key_pair_name = "key-pair-main"
+    vpc_id = module.vpc.vpc_id
+    cluster_name = "shared"
+    instance_type = "t3a.nano"
+    desired_capacity = 1
+    min_capacity = 1
+    max_capacity = 1
+}
+
 module "ecs-gateway" {
     source = "./modules/ecs-gateway"
-    ## vpc
+    ## vpc && cluster
     vpc_id = module.vpc.vpc_id
+    cluster_id = module.ecs-cluster.ecs_cluster.id
+    cluster_type = "EC2"
     ## service descovery
     service_registry_arn = aws_service_discovery_private_dns_namespace.main.arn
     service_registry_id = aws_service_discovery_private_dns_namespace.main.id

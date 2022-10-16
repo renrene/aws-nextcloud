@@ -17,18 +17,14 @@ terraform {
     }
 }
 
-resource "aws_ecs_cluster" "main" {
-    name = "main"
-}
-
 module "ecs-nginx" {
     source = "./modules/ecs-service"
     ## service details
     ecs_service_name = "nginx-dummy"
     # Global Task-Definition specs
     service_specs = {
-      cpu = 256
-      memory = 512
+      cpu = 128
+      memory = 128
     }
     # Container Specs
     task_specs = {
@@ -37,7 +33,8 @@ module "ecs-nginx" {
       memory = 128
     }
     ## cluster and vpc
-    ecs_cluster_id = aws_ecs_cluster.main.id
+    ecs_cluster_id = data.terraform_remote_state.shared.outputs.ecs_cluster.id
+    ecs_cluster_type = "EC2"
     vpc_id = module.vpc.vpc_id
     shared_security_id = aws_security_group.access_from_share.id
     ## service descovery
@@ -70,7 +67,7 @@ module "ecs-nextcloud" {
       memory = 512
     }
     ## cluster and vpc
-    ecs_cluster_id = aws_ecs_cluster.main.id
+    ecs_cluster_id = data.terraform_remote_state.shared.outputs.ecs_cluster.id
     vpc_id = module.vpc.vpc_id
     shared_security_id = aws_security_group.access_from_share.id
     ## service descovery

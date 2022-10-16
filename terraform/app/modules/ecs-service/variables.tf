@@ -3,6 +3,12 @@ variable "ecs_cluster_id" {
     description = "Service hosting ECS cluster id"
 }
 
+variable "ecs_cluster_type" {
+    type = string
+    description = "ECS Cluster type (EC2 | FARGATE)"
+    default = "FARGATE"
+}
+
 variable "ecs_service_name" {
     type = string
     description = "Name of the ecs service"

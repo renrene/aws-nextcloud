@@ -73,7 +73,7 @@ resource "aws_ecs_task_definition" "main" {
     network_mode = "awsvpc"
     cpu = var.service_specs.cpu
     memory = var.service_specs.memory
-    requires_compatibilities = [ "FARGATE" ]
+    requires_compatibilities = [ var.ecs_cluster_type ]
     execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
     task_role_arn = aws_iam_role.ecs_task_role.arn
     container_definitions = jsonencode([
@@ -98,13 +98,12 @@ resource "aws_ecs_service" "main" {
     name = var.ecs_service_name
     cluster = var.ecs_cluster_id
     task_definition = aws_ecs_task_definition.main.arn
-    launch_type = "FARGATE"
+    launch_type = var.ecs_cluster_type
     desired_count = 1
 
     network_configuration {
         security_groups = [ aws_security_group.ecs.id, var.shared_security_id ]
         subnets = data.aws_subnets.public_subnets.ids
-        assign_public_ip = true
     }
 
     service_registries {

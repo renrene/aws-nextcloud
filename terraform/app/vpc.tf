@@ -68,27 +68,29 @@ resource "aws_security_group" "access_from_share" {
 
 ## Data vpc peering, routing and security groups
 resource "aws_vpc_peering_connection" "data" {
+  count = can(data.terraform_remote_state.data.outputs.vpc.vpc_id) ?  1 : 0
   vpc_id = module.vpc.vpc_id
   peer_vpc_id = data.terraform_remote_state.data.outputs.vpc.vpc_id
   auto_accept = true  
 }
 
 resource "aws_route" "main-data" {
-    count = length(module.vpc.public_route_table_ids)
+    count = can(data.terraform_remote_state.data.outputs.vpc.vpc_id) ? length(module.vpc.public_route_table_ids) : 0
     route_table_id = module.vpc.public_route_table_ids[count.index]
     destination_cidr_block = data.terraform_remote_state.data.outputs.vpc.vpc_cidr_block
-    vpc_peering_connection_id = aws_vpc_peering_connection.data.id
+    vpc_peering_connection_id = aws_vpc_peering_connection.data[0].id
 }
 
 resource "aws_route" "data-main" {
-    count = length(data.terraform_remote_state.data.outputs.vpc.database_route_table_ids)
+    count = can(data.terraform_remote_state.data.outputs.vpc.vpc_id) ?  length(data.terraform_remote_state.data.outputs.vpc.database_route_table_ids) : 0 
     route_table_id = data.terraform_remote_state.data.outputs.vpc.database_route_table_ids[count.index]
     destination_cidr_block = module.vpc.vpc_cidr_block
-    vpc_peering_connection_id = aws_vpc_peering_connection.data.id
+    vpc_peering_connection_id = aws_vpc_peering_connection.data[0].id
 }
 
 
 resource "aws_security_group_rule" "access_to_data" {
+  count = can(data.terraform_remote_state.data.outputs.nextcloud_db_security_group) ?  1 : 0
   type = "ingress"
   security_group_id = data.terraform_remote_state.data.outputs.nextcloud_db_security_group
   cidr_blocks = [ module.vpc.vpc_cidr_block ]
