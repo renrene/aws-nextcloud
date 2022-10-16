@@ -6,7 +6,7 @@ locals {
 }
 
 resource "aws_apigatewayv2_api" "main" {
-    name = "api-gw-privatier"
+    name = "api-gw-nextcloud"
     protocol_type = "HTTP"
 }
 

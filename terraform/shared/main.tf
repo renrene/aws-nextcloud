@@ -10,7 +10,7 @@ terraform {
         }
     }
     backend "s3" {
-        bucket = "privatier-tf-state-backend"
+        bucket = "nextcloud-tf-state-backend"
         key = "shared"
         profile = "privatier"
         region = "eu-west-1"
@@ -19,14 +19,14 @@ terraform {
 
 ## Global CloudMap namespace
 resource "aws_service_discovery_private_dns_namespace" "main" {
-    name = "privatier.local"
-    description = "service discovery for Privatier"
+    name = "nextcloud.local"
+    description = "service discovery for nextcloud"
     vpc = module.vpc.vpc_id
 }
 
 ## Global AppMesh
 resource "aws_appmesh_mesh" "main" {
-    name = "privatier-local"
+    name = "nextcloud-local"
     spec {
       egress_filter {
         type = "ALLOW_ALL"

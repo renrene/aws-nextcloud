@@ -10,7 +10,7 @@ terraform {
         }
     }
     backend "s3" {
-        bucket = "privatier-tf-state-backend"
+        bucket = "nextcloud-tf-state-backend"
         key = "data"
         profile = "privatier"
         region = "eu-west-1"
